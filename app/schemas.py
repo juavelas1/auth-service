@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
+from . import config
 
 
 # === Base user schema ===
@@ -39,3 +40,27 @@ class PasswordChangeRequest(BaseModel):
     current_password: str
     new_password: str
     confirm_new_password: str
+
+# === Schema for Forgot Password request ===
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+# === Schema for email verification ===
+class VerifyCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+# === Schema for password reset request ===
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+    confirm_password: str
+
+# === Schema for email requests ===
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+# === Schema for user activation ===
+class ActivateUserRequest(BaseModel):
+    email: EmailStr
+    code: str

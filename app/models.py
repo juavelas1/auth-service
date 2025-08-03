@@ -10,4 +10,13 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime)
+
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False)
+    code = Column(String, nullable=False)
+    token = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime)
+    is_verified = Column(Boolean, default=False)
