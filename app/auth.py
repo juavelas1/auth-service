@@ -58,7 +58,7 @@ def authenticate_user(db: Session, email: str, password: str):
 
 # === Dependency to get the current user ===
 def get_current_user(
-    db: Session = Depends(database.SessionLocal),
+    db: Session = Depends(database.get_db),
     token: str = Depends(oauth2_scheme)
 ):
     if is_token_blacklisted(token):
