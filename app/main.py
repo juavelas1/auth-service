@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .middleware import audit_log_middleware # <-- IMPORTAR EL MIDDLEWARE
+from app import config
 
 from . import models, database, routes
 
@@ -12,6 +14,8 @@ app = FastAPI(
     description="Microservice for user authentication and token management",
     root_path="/auth"
 )
+# Añadir middleware de auditoría
+app.middleware("http")(audit_log_middleware)
 
 # CORS settings (puedes ajustarlo para producción)
 app.add_middleware(
