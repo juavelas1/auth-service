@@ -3,6 +3,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime
 from jose import jwt
+from typing import List
+from app.database import get_db
 
 from . import auth, models, schemas, database, config
 from app.auth import get_current_user
@@ -12,7 +14,7 @@ router = APIRouter()
 
 # === Registro de usuario ===
 @router.post("/register", response_model=schemas.UserOut)
-def register_user(user: schemas.UserCreate, db: Session = Depends(database.SessionLocal)):
+def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     existing = auth.get_user_by_email(db, user.email)
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -33,7 +35,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.Sessi
 
 # === Login (retorna token) ===
 @router.post("/login", response_model=schemas.Token)
-def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.SessionLocal)):
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = auth.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
@@ -61,3 +63,27 @@ def logout(token: str = Depends(auth.oauth2_scheme)):
 @router.get("/me", response_model=schemas.UserOut)
 def get_me(current_user=Depends(get_current_user)):
     return current_user
+
+
+@router.get("/users", response_model=List[schemas.UserOut])
+def get_users(db: Session = Depends(database.get_db)):
+    users = db.query(models.User).all()
+    return users
+
+@router.post("/change-password")
+def change_password(
+    payload: schemas.PasswordChangeRequest,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    if not auth.verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    if payload.new_password != payload.confirm_new_password:
+        raise HTTPException(status_code=400, detail="New passwords do not match")
+
+    hashed = auth.get_password_hash(payload.new_password)
+    current_user.hashed_password = hashed
+    db.commit()
+
+    return {"message": "Password updated successfully"}

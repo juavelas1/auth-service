@@ -15,10 +15,15 @@ class UserCreate(UserBase):
 
 
 # === Schema for returned user (output) ===
-class UserOut(UserBase):
+class UserOut(BaseModel):
     id: int
-    is_active: Optional[bool] = True
-    created_at: Optional[datetime] = None
+    email: EmailStr
+    full_name: str
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True  # Pydantic v2
 
 class Config:
     from_attributes = True
@@ -28,3 +33,9 @@ class Config:
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+# === Schema for password change request ===
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_new_password: str
