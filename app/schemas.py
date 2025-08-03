@@ -64,3 +64,24 @@ class EmailRequest(BaseModel):
 class ActivateUserRequest(BaseModel):
     email: EmailStr
     code: str
+
+# NUEVO ESQUEMA PARA LA RESPUESTA DE AUDITORÍA
+class AuditLog(BaseModel):
+    id: int
+    user_id: int | None = None # Puede ser nulo
+    action: str
+    endpoint: str
+    method: str
+    ip_address: str
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True # En Pydantic v2, antes orm_mode = True
+        orm_mode = True  # Permite que Pydantic use los modelos de SQLAlchemy directamente
+
+# === Schema for password reset request ===
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+    confirm_password: str

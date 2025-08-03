@@ -1,4 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 from .database import Base
 from datetime import datetime
 
@@ -26,10 +29,11 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Puede ser nulo para acciones no autenticadas (ej. login)
-    action = Column(String, index=True) # Ej: "user_login", "get_profile"
-    endpoint = Column(String) # Ej: "/login"
-    method = Column(String) # Ej: "POST"
+    # Esta línea ahora funcionará porque ForeignKey está importado
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action = Column(String, index=True)
+    endpoint = Column(String)
+    method = Column(String)
     ip_address = Column(String)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 

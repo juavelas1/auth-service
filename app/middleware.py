@@ -3,9 +3,10 @@
 from fastapi import Request
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, config
+from .database import get_db
+from .auth import oauth2_scheme
 from .database import SessionLocal
-from .config import settings # Asumiendo que tienes un config.py para las settings
 
 # Función para obtener la base de datos
 def get_db():
@@ -28,7 +29,7 @@ async def log_audit_event(request: Request):
     # Si hay un token, intentar decodificarlo para obtener el user_id
     if token:
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
             username: str = payload.get("sub")
             if username:
                 user = db.query(models.User).filter(models.User.username == username).first()
